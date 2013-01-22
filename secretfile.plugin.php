@@ -48,14 +48,41 @@ class SecretFilePlugin extends Plugin
 			// Does this user have access to the post?
 			$post = Post::get(array('id' => $media['post_id']));
 			if($post instanceof Post) {
-				header('Content-Type: image/jpeg');
+				$finfo = new finfo(FILEINFO_MIME_TYPE);
+				header('Content-Type: ' . $finfo->buffer($asset->content));
+				header('Content-Disposition: attachment;filename=' . $filename);
 				echo $asset->content;
 				exit;
 			}
 		}
 		// Redirect to the original post
-		Utils::redirect(Post::get(array('id' => $post_id))->permalink);
+		$post = Post::get(array('id' => $post_id));
+		if($post instanceof Post) {
+			Utils::redirect($post->permalink);
+		}
+		else {
+			Utils::redirect(Site::get_url('habari'));
+		}
 		exit;
+	}
+
+
+	public function action_admin_header( $theme )
+	{
+		if( 'publish' == $theme->page ) {
+			$output = <<< MEDIAJS
+var secret_link = {
+	insert_secret_link: function(fileindex, fileobj) {
+		habari.editor.insertSelection('[secretfile hurl="'+fileobj.path+'" filename="'+fileobj.basename+'"]'+fileobj.title+'[/secretfile]');
+	}
+};
+$.extend(habari.media.output._, secret_link);
+$.extend(habari.media.output.image_jpeg, secret_link);
+$.extend(habari.media.output.image_png, secret_link);
+$.extend(habari.media.output.image_gif, secret_link);
+MEDIAJS;
+			Stack::add( 'admin_header_javascript', $output, 'secretfile', array( 'media' ) );
+		}
 	}
 }
 
