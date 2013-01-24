@@ -80,6 +80,7 @@ $.extend(habari.media.output._, secret_link);
 $.extend(habari.media.output.image_jpeg, secret_link);
 $.extend(habari.media.output.image_png, secret_link);
 $.extend(habari.media.output.image_gif, secret_link);
+$.extend(habari.media.output.flickr, secret_link);
 MEDIAJS;
 			Stack::add( 'admin_header_javascript', $output, 'secretfile', array( 'media' ) );
 		}
